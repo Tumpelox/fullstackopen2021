@@ -1,0 +1,13 @@
+import React, { useEffect } from 'react'
+import numberService from '../services/Axios.js'
+import {Button} from './Utilities.js'
+
+const id = contactId => {
+    numberService
+    .remove(contactId)
+    .then(response => {
+        setPersons(persons.concat(response))
+    })
+}
+
+export default { id }
