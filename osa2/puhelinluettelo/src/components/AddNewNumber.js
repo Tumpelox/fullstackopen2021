@@ -39,12 +39,12 @@ const AddNewNumber = ({persons, setPersons, setMessage}) => {
                 numberService
                 .update(personId, numberInfo)
                 .then(response => {
+                    setPersons(persons.map(person => person.id === response.id ? response : person))
                     setMessage({
                         "text": `Henkilön ${newName} numero päivitetty`,
                         "type": "confirm",
                         "isMessage": true
                     })
-                    setPersons(persons.map(person => person.id === response.id ? response : person))
                 })
                 .catch(error => {
                     setMessage({
