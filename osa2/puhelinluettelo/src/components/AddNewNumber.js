@@ -27,26 +27,24 @@ const AddNewNumber = ({persons, setPersons, setMessage}) => {
             numberService
             .create(numberInfo)
             .then(response => {
-                setPersons(persons.concat(response))
-
                 setMessage({
                     "text": `Henkilö ${newName} lisätty luetteloon`,
                     "type": "confirm",
                     "isMessage": true
-                  })
+                })
+                setPersons(persons.concat(response))
             })
         } else if (isSame && window.confirm(`Henkilö ${newName} on jo luettelossa. Päivitetäänkö numero?`)) {
             let personId = persons.find(person => person.name === newName).id
                 numberService
                 .update(personId, numberInfo)
                 .then(response => {
-                    setPersons(persons.map(person => person.id === response.id ? response : person))
-                    
                     setMessage({
                         "text": `Henkilön ${newName} numero päivitetty`,
                         "type": "confirm",
                         "isMessage": true
                     })
+                    setPersons(persons.map(person => person.id === response.id ? response : person))
                 })
                 .catch(error => {
                     setMessage({
