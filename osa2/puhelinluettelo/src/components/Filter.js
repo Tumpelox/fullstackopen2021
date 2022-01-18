@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 
-const Filter = ({persons, nameFilter, setNameFilter}) => {
+const Filter = ({persons, setNameFilter}) => {
     const [newFilter, setNewFilter] = useState('')
 
-    const handleChange = async (event) => {
-        await setNewFilter(event.target.value)
-        await setNameFilter(persons.filter(person =>
+    const handleChange = (event) => {
+        setNewFilter(event.target.value)
+        setNameFilter(persons.filter(person =>
             person.name.toLowerCase().includes(event.target.value.toLowerCase())
         ))
     }

@@ -37,7 +37,6 @@ const App = () => {
 
       <Filter 
       persons={persons} 
-      nameFilter={nameFilter} 
       setNameFilter={setNameFilter} 
       />
 
