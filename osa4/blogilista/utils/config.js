@@ -6,7 +6,10 @@ const MONGO_URI = process.env.NODE_ENV === "test"
 
 const PORT = process.env.PORT || 3003
 
+const SECRET = process.env.SECRET
+
 module.exports = {
     MONGO_URI,
-    PORT
+    PORT,
+    SECRET
 }

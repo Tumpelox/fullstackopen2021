@@ -1,10 +1,8 @@
-const { response } = require('express')
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const User = require('../models/user')
-const { use } = require('express/lib/router')
 const apitest = supertest(app)
 
 describe('when there is initially one user in the  database', () => { 
@@ -59,5 +57,81 @@ describe('when there is initially one user in the  database', () => {
 
         expect(result.body.error).toContain('`username` to be unique')
         expect(usersAtStart).toHaveLength(usersAtStart.length)
+    })
+    test('trying to create new user without password', async () => {
+        const usersAtStart = await User.find({})
+
+        const newUser = {
+            username: 'superuser'
+        }
+
+        const result = await apitest
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+            .expect('Content-Type', 'application\/json; charset=utf-8')
+
+        expect(result.body.error).toContain('password does not meet requirements. (it must be at least 3 characters long)')
+        expect(usersAtStart).toHaveLength(usersAtStart.length)
+    })
+    test('trying to create new user with too short password', async () => {
+        const usersAtStart = await User.find({})
+
+        const newUser = {
+            username: 'super user',
+            password: 'jj'
+        }
+
+        const result = await apitest
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+            .expect('Content-Type', 'application\/json; charset=utf-8')
+
+        expect(result.body.error).toContain('password does not meet requirements. (it must be at least 3 characters long)')
+        expect(usersAtStart).toHaveLength(usersAtStart.length)
+    })
+    test('trying to login with initial username and password', async () => {
+        const oldUser = {
+            username: 'sudo su',
+            password: 'salainen'
+        }
+
+        const result = await apitest
+            .post('/api/login')
+            .send(oldUser)
+            .expect(200)
+            .expect('Content-Type', 'application\/json; charset=utf-8')
+
+        expect(result.body).toHaveProperty("token")
+        expect(result.body.username).toContain('sudo su')
+    })
+    test('trying to login with wrong password', async () => {
+        const oldUser = {
+            username: 'sudo su',
+            password: 'password123'
+        }
+
+        const result = await apitest
+            .post('/api/login')
+            .send(oldUser)
+            .expect(401)
+            .expect('Content-Type', 'application\/json; charset=utf-8')
+
+        expect(result.body.error).toContain('invalid username or password')
+    })
+    test('trying to login with wrong user', async () => {
+        const oldUser = {
+            username: 'sudoboi',
+            password: 'password123'
+        }
+
+        const result = await apitest
+            .post('/api/login')
+            .send(oldUser)
+            .expect(401)
+            .expect('Content-Type', 'application\/json; charset=utf-8')
+
+        expect(result.body.error).toContain('invalid username or password')
     })
 })
