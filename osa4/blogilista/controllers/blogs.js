@@ -1,5 +1,6 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const user = require('../models/user')
 const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
@@ -40,17 +41,15 @@ blogsRouter.post('/', async (request, response) => {
 blogsRouter.put('/:id', async (request, response) => {
     const blog = await Blog.findById(request.params.id)
 
-    if ( !( blog.user.toString() === request.userId ) ) {
-        return response.status(401).send({ error: 'user is unauthorized' })
-    }
-
     const body = request.body
 
     const updatetBlog = new Blog({
+        id: blog._id.toString(),
         title: body.title,
         author: body.author,
         url: body.url,
-        likes: body.likes
+        likes: body.likes,
+        user: blog.user._id.toString()
     })
 
     var result = await Blog.findByIdAndUpdate({_id: blog._id.toString()}, request.body, { new: true }).populate({
