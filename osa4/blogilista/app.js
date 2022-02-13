@@ -23,10 +23,15 @@ app.use('/api/login', loginRouter)
 app.use(middleware.tokenExtractor)
 app.use(middleware.userExtractor)
 app.use('/api/blogs', blogsRouter)
+
+if (process.env.NODE_ENV === "test" ) {
+    const testsRouter = require('./controllers/tests')
+    app.use('/api/testing', testsRouter)
+}
+
 app.use(middleware.errorHandler)
 app.use(middleware.unknownEndpoint)
 
 mongoose.connect(config.MONGO_URI)
-
 
 module.exports = app

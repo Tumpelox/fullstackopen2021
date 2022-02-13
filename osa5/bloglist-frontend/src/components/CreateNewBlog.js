@@ -1,29 +1,20 @@
 import React, { useState } from 'react'
-import blogsService from '../services/blogs'
 
-const CreateNewBlog = ({ blogs, setBlogs, setMessage }) => {
+const CreateNewBlog = ({ createBlog }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
   const handleCreate = async (event) => {
     event.preventDefault()
-    try {
-      const newblog = await blogsService.createNew({
-        author,
-        title,
-        url,
-      })
-      setBlogs(blogs.concat(newblog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      setMessage({ text: `Added ${newblog.title} by ${newblog.author}`, type: 'confirm' })
-      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
-    } catch (exception) {
-      setMessage({ text: 'Failed to add new blog', type: 'error' })
-      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
-    }
+    createBlog({
+      author,
+      title,
+      url,
+    })
+    setTitle('')
+    setAuthor('')
+    setUrl('')
   }
 
   return (
@@ -31,6 +22,7 @@ const CreateNewBlog = ({ blogs, setBlogs, setMessage }) => {
       <div>
             Title:
         <input
+          id='title'
           type='text'
           name='Title'
           value={title}
@@ -40,6 +32,7 @@ const CreateNewBlog = ({ blogs, setBlogs, setMessage }) => {
       <div>
           Author:
         <input
+          id='author'
           type='text'
           name='Author'
           value={author}
@@ -49,13 +42,14 @@ const CreateNewBlog = ({ blogs, setBlogs, setMessage }) => {
       <div>
           URL:
         <input
+          id='url'
           type='text'
           name='Url'
           value={url}
           onChange={ ({ target }) => setUrl(target.value) }
         />
       </div>
-      <button type='submit'>Create</button>
+      <button type='submit' id='create'>Create</button>
     </form>
   )
 }

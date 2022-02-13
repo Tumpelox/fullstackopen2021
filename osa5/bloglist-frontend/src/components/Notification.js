@@ -28,7 +28,7 @@ const Notification = ({ message }) => {
   }
   if (message.text) {
     return (
-      <div style={messageStyle()}>
+      <div className={message.type} style={messageStyle()}>
         <p style={{ margin: '0px' }}>{message.text}</p>
       </div>
     )

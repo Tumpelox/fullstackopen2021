@@ -15,7 +15,10 @@ const App = () => {
 
   useEffect( () => {
     blogService.getAll()
-      .then(response => setBlogs(response))
+      .then(response => {
+        var sorted = response.sort( (firstBlog, secondBlog) => secondBlog.likes - firstBlog.likes )
+        setBlogs(sorted)
+      })
   }, [])
 
   useEffect(() => {
@@ -37,22 +40,82 @@ const App = () => {
     window.localStorage.removeItem('loggedUser')
   }
 
+  const deleteBlog = async blog => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      try {
+        await blogService.remove(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        setMessage({ text: `Deleted ${blog.title} by ${blog.author} `, type: 'confirm' })
+        setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+      } catch(exception) {
+        console.log(exception)
+        setMessage({ text: 'Blog delete failed', type: 'error' })
+        setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+      }
+    }
+  }
+
+  const updateBlog = async blog => {
+    try {
+      const updatedBlog = await blogService.modify({
+        id: blog.id,
+        author: blog.author,
+        title: blog.title,
+        url: blog.url,
+        likes: blog.likes + 1,
+        user: blog.user.id
+      })
+      console.log(updatedBlog)
+      setBlogs(blogs.filter(b => b.id !== blog.id ? b : b.likes += 1 ))
+      setMessage({ text: `Updated ${blog.title} by ${blog.author} `, type: 'confirm' })
+      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+    } catch(exception) {
+      console.log(exception)
+      setMessage({ text: 'Blog update failed', type: 'error' })
+      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+    }
+  }
+
+  const createBlog = async blog => {
+    try {
+      const newblog = await blogService.createNew(blog)
+      setBlogs(blogs.concat(newblog))
+      blogForm.current.toggleVisibility()
+      setMessage({ text: `Added ${newblog.title} by ${newblog.author}`, type: 'confirm' })
+      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+    } catch (exception) {
+      setMessage({ text: 'Failed to add new blog', type: 'error' })
+      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+    }
+  }
+
   const showBlogs = () => (
     <>
       <p>{user.name} logged in <button onClick={() => logout()}>Logout</button></p>
-      <Togglable ref={blogForm}>
-        <Create blogs={blogs} setBlogs={setBlogs} setMessage={setMessage} />
+      <Togglable buttonLabel='Create new' ref={blogForm}>
+        <Create blogs={blogs} createBlog={createBlog} />
       </Togglable>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} setBlogs={setBlogs} blogs={blogs} setMessage={setMessage} />
-      )}
+      <ul style={{ padding: '0'  }}>
+        {blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
+        )}
+      </ul>
     </>
   )
 
   const loginForm = () => (
-    <Login user={user} setUser={setUser} setMessage={setMessage} />
+    <>
+      <Togglable buttonLabel='Login' ref={blogForm}>
+        <Login user={user} setUser={setUser} setMessage={setMessage} />
+      </Togglable>
+      <ul style={{ padding: '0'  }}>
+        {blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
+        )}
+      </ul>
+    </>
   )
-
+  console.log(blogs)
   return (
     <div>
       <Notification message={message} />
