@@ -23,7 +23,34 @@ const reducer = (state = initialState, action) => {
   console.log('state now: ', state)
   console.log('action', action)
 
+  if (action.type === 'VOTE') {
+    state = state.map(anecdote => {
+      if (anecdote.id === action.data.id) {
+        anecdote.votes += 1
+      }
+      return anecdote
+    })
+  } else if (action.type === 'NEW_ANECDOTE') {
+    state = state.concat(asObject(action.data.content))
+  }
+
+  state = state.sort( (first, second) => second.votes - first.votes )
+
   return state
+}
+
+export const voteAnecdote = (id) => {
+  return {
+    type: 'VOTE',
+    data: { id }
+  }
+}
+
+export const createAnecdote = (content) => {
+  return {
+    type: 'NEW_ANECDOTE',
+    data: { content }
+  }
 }
 
 export default reducer
