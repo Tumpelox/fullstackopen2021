@@ -12,7 +12,10 @@ const AnecdotesList  = () => {
     setTimeout(() => dispatch(closeNotification()), 5000)
   }
 
-  const anecdotes = useSelector(state => state.anecdotes)
+  var anecdotes = useSelector(state => state.anecdotes)
+  var filter = useSelector(state => state.filter)
+  
+  anecdotes  = anecdotes.filter(anecdote => anecdote.content.toLowerCase().includes(filter.filter.toLowerCase()))
 
   return (
     <div>
