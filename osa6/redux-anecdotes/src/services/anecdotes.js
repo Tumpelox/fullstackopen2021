@@ -7,4 +7,15 @@ const getAll = async () => {
   return response.data
 }
 
-export { getAll }
+const createNew = async content => {
+  const body = { content, votes: 0}
+  const response = await Axios.post(baseUrl, body)
+  return response.data
+}
+
+const modify = async ( id, content ) => {
+  const response = await Axios.put(baseUrl + '/' + id, content)
+  return response.data
+}
+
+export default { getAll, createNew, modify } // eslint-disable-line import/no-anonymous-default-export

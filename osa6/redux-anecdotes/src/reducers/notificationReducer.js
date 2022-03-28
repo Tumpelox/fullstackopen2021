@@ -11,7 +11,7 @@ const notificationSlice = createSlice({
   reducers: {
     setNotification(state, action) {
       const content = action.payload
-      state.text = content.type === 'VOTE' ? 'You voted ' + content.text : 'You created ' + content.text
+      state.text = content
       state.display = "block"
       
     },
@@ -23,4 +23,12 @@ const notificationSlice = createSlice({
 })
 
 export const { setNotification, closeNotification } = notificationSlice.actions
+
+export const showNotification = (message, time) => {
+  return dispatch => {
+    dispatch(setNotification(message))
+    setTimeout(() => dispatch(closeNotification()), time * 1000)
+  }
+}
+
 export default notificationSlice.reducer
