@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useField } from './hooks/'
+import { useField } from './hooks'
 import { BrowserRouter as Router,
   Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'
 
