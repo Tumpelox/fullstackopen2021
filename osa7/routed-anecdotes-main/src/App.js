@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { useField } from './hooks/'
 import { BrowserRouter as Router,
-  Routes, Route, Link, useParams } from 'react-router-dom'
+  Routes, Route, Link, useParams, useNavigate } from 'react-router-dom'
 
 const Menu = () => {
   const padding = {
@@ -11,6 +12,25 @@ const Menu = () => {
       <Link to='/' style={padding}>anecdotes</Link>
       <Link to='/create' style={padding}>create new</Link>
       <Link to='/about' style={padding}>about</Link>
+    </div>
+  )
+}
+
+const Notification = ({ notification }) => {
+  var style={
+    display: 'none',
+    border: '1px solid',
+    padding: '10px'
+  }
+  if (notification.active) {
+    style.display = 'block'
+  } else {
+    style.display = 'none'
+  }
+
+  return (
+    <div style={style}>
+      {notification.message}
     </div>
   )
 }
@@ -27,7 +47,7 @@ const AnecdoteList = ({ anecdotes }) => (
 const Anecdote = ({anecdotes}) => {
   const id = useParams().id
   const anecdote = anecdotes.find(a => a.id.toString() === id)
-  console.log(anecdote)
+
   return (
     <div>
       <p>{anecdote.content}, by {anecdote.author}</p>
@@ -59,20 +79,29 @@ const Footer = () => (
   </div>
 )
 
-const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+const CreateNew = ({ setNotification, addNew }) => {
+  const [ authorReset, author ]= useField('text')
+  const [ infoReset, info ]= useField('text')
+  const [ contentReset, content ]= useField('text')
+  const navigate = useNavigate()
 
+  const resetForm = () => {
+    authorReset('')
+    infoReset('')
+    contentReset('')
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    props.addNew({
-      content,
-      author,
-      info,
+    addNew({
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0
     })
+    navigate("/")
+    setNotification({message:'You created ' + content.value + ' by ' + author, active: true})
+    setTimeout(() => setNotification({message:'', active: false}), 5000)
   }
 
   return (
@@ -81,17 +110,17 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input {...content} />
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input {...author} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input {...info} />
         </div>
-        <button>create</button>
+        <button type='submit'>create</button><button type='button' onClick={resetForm}>reset</button>
       </form>
     </div>
   )
@@ -116,7 +145,7 @@ const App = () => {
     }
   ])
 
-  const [notification, setNotification] = useState('')
+  const [notification, setNotification] = useState({message:"", active:false})
 
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
@@ -140,11 +169,12 @@ const App = () => {
   return (
     <Router >
       <h1>Software anecdotes</h1>
+      <Notification notification={notification} />
       <Menu />
       <Routes>
         <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
         <Route path="/about" element={<About />} />
-        <Route path="/create" element={<CreateNew addNew={addNew} />} />
+        <Route path="/create" element={<CreateNew setNotification={setNotification} addNew={addNew} />} />
         <Route path="/anecdote/:id" element={<Anecdote anecdotes={anecdotes} />}/>
       </Routes>
       <Footer />
