@@ -45,8 +45,15 @@ export const voteBlog = blog => {
 
 export const removeBlog = blog => {
   return async dispatch => {
-    const removedBlog = await blogService.modify(blog.id)
+    const removedBlog = await blogService.remove(blog.id)
     dispatch(deleteBlog(removedBlog))
+  }
+}
+
+export const createBlog = blog => {
+  return async dispatch => {
+    const createdBlog = await blogService.createNew(blog)
+    dispatch(appendBlog(createdBlog))
   }
 }
 
@@ -56,7 +63,5 @@ export const initializeBlogs = () => {
     dispatch(setBlogs(blogs))
   }
 }
-
-
 
 export default blogsSlice.reducer

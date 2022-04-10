@@ -1,25 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
+import Blog from './utilities/Blog'
 import blogService from './services/blogs'
-import Login from './components/Login'
-import Create from './components/CreateNewBlog'
-import Togglable from './components/Togglable'
+import Login from './utilities/Login'
+import Create from './utilities/CreateNewBlog'
+import Togglable from './utilities/Togglable'
 import Notification from './components/Notification'
+import { useDispatch, useSelector } from 'react-redux'
+import { initializeBlogs } from './reducers/blogsReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
-  const [message, setMessage] = useState({})
+  const dispatch = useDispatch()
 
   const blogForm = useRef()
 
-  useEffect( () => {
-    blogService.getAll()
-      .then(response => {
-        var sorted = response.sort( (firstBlog, secondBlog) => secondBlog.likes - firstBlog.likes )
-        setBlogs(sorted)
-      })
-  }, [])
+  useEffect( () => dispatch(initializeBlogs()), [dispatch])
 
   useEffect(() => {
     const loggedUser = window.localStorage.getItem('loggedUser')
@@ -31,11 +25,7 @@ const App = () => {
   }, [])
 
   const logout = () => {
-    setMessage({ text: `Logged out ${user.name !== undefined ? user.name : ''}`, type: 'confirm' })
-    setTimeout(
-      () => { setMessage({ text: null, type: null }) },
-      5000
-    )
+    setMessage({ text: `Logged out ${user.name !== undefined ? user.name : ''}`, type: 'confirm' }, 5)
     setUser(null)
     window.localStorage.removeItem('loggedUser')
   }
@@ -43,87 +33,60 @@ const App = () => {
   const deleteBlog = async blog => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
       try {
-        await blogService.remove(blog.id)
-        setBlogs(blogs.filter(b => b.id !== blog.id))
-        setMessage({ text: `Deleted ${blog.title} by ${blog.author} `, type: 'confirm' })
-        setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+
+        setMessage({ text: `Deleted ${blog.title} by ${blog.author} `, type: 'confirm' }, 5)
       } catch(exception) {
-        console.log(exception)
-        setMessage({ text: 'Blog delete failed', type: 'error' })
-        setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+        setMessage({ text: 'Blog delete failed', type: 'error' }, 5)
       }
     }
   }
 
   const updateBlog = async blog => {
     try {
-      const updatedBlog = await blogService.modify({
-        id: blog.id,
-        author: blog.author,
-        title: blog.title,
-        url: blog.url,
-        likes: blog.likes + 1,
-        user: blog.user.id
-      })
-      console.log(updatedBlog)
-      setBlogs(blogs.filter(b => b.id !== blog.id ? b : b.likes += 1 ))
-      setMessage({ text: `Updated ${blog.title} by ${blog.author} `, type: 'confirm' })
-      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+      voteBlog(blogs.filter(b => b.id !== blog.id ? b : b.likes += 1 ))
+      setMessage({ text: `Updated ${blog.title} by ${blog.author} `, type: 'confirm' }, 5)
     } catch(exception) {
-      console.log(exception)
-      setMessage({ text: 'Blog update failed', type: 'error' })
-      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+      setMessage({ text: 'Blog update failed', type: 'error' }, 5)
     }
   }
 
   const createBlog = async blog => {
     try {
-      const newblog = await blogService.createNew(blog)
-      setBlogs(blogs.concat(newblog))
       blogForm.current.toggleVisibility()
-      setMessage({ text: `Added ${newblog.title} by ${newblog.author}`, type: 'confirm' })
-      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+      createBlog(blog)
+      setMessage({ text: `Added ${blog.title} by ${blog.author}`, type: 'confirm' }, 5)
     } catch (exception) {
-      setMessage({ text: 'Failed to add new blog', type: 'error' })
-      setTimeout(() => {setMessage({ 'text': null,'type': null })}, 5000)
+      setMessage({ text: 'Failed to add new blog', type: 'error' }, 5)
     }
   }
 
-  const showBlogs = () => (
-    <>
-      <p>{user.name} logged in <button onClick={() => logout()}>Logout</button></p>
-      <Togglable buttonLabel='Create new' ref={blogForm}>
-        <Create blogs={blogs} createBlog={createBlog} />
-      </Togglable>
-      <ul style={{ padding: '0'  }}>
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
-        )}
-      </ul>
-    </>
-  )
+  const showBlogs = () => {
+    var user = useSelector(state => state.user)
+    return (
+      <>
+        <p>{user.name} logged in <button onClick={() => logout()}>Logout</button></p>
+        <Togglable buttonLabel='Create new' ref={blogForm}>
+          <Create />
+        </Togglable>
+      </>
+    )
+  }
 
   const loginForm = () => (
-    <>
-      <Togglable buttonLabel='Login' ref={blogForm}>
-        <Login user={user} setUser={setUser} setMessage={setMessage} />
-      </Togglable>
-      <ul style={{ padding: '0'  }}>
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />
-        )}
-      </ul>
-    </>
+    <Togglable buttonLabel='Login' ref={blogForm}>
+      <Login />
+    </Togglable>
   )
-  console.log(blogs)
+
   return (
     <div>
-      <Notification message={message} />
+      <Notification />
       <h2>blogs</h2>
       {user === null ?
         loginForm() :
         showBlogs()
       }
+      <Blogs />
     </div>
   )
 }
