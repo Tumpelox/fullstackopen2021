@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 import blogService from '../services/blogs'
+import { showMessage } from './messageReducer'
 
 const blogsSlice = createSlice({
-  name: 'user',
+  name: 'blogs',
   initialState: null,
   reducers: {
     modifyBlog(state, action) {
@@ -29,28 +30,39 @@ const blogsSlice = createSlice({
 export const { modifyBlog, deleteBlog, appendBlog, setBlogs } = blogsSlice.actions
 
 export const voteBlog = blog => {
-  const data = {
-    id: blog.id,
-    author: blog.author,
-    title: blog.title,
-    url: blog.url,
-    likes: blog.likes + 1,
-    user: blog.user.id
-  }
+  const data = { likes: blog.likes + 1, id: blog.id }
   return async dispatch => {
     const updatedBlog = await blogService.modify(data)
     dispatch(modifyBlog(updatedBlog))
   }
 }
 
-export const removeBlog = blog => {
+export const commentBlog = (comment, id) => {
   return async dispatch => {
-    const removedBlog = await blogService.remove(blog.id)
-    dispatch(deleteBlog(removedBlog))
+    const updatedBlog = await blogService.comment(comment, id)
+    if (updatedBlog === 401) {
+      dispatch(showMessage({ text: 'Comment sending failed. Please login to send comments', type: 'error' }, 5))
+    } else {
+      dispatch(modifyBlog(updatedBlog))
+      dispatch(showMessage({ text: 'Comment sent', type: 'confirm' }, 5))
+    }
   }
 }
 
-export const createBlog = blog => {
+
+export const removeBlog = blog => {
+  return async dispatch => {
+    const response = await blogService.remove(blog.id)
+    if (response !== 204) {
+      dispatch(showMessage({ text: 'Blog delete failed', type: 'error' }, 5))
+    } else {
+      dispatch(deleteBlog(blog))
+      dispatch(showMessage({ text: `Deleted ${blog.title} by ${blog.author} `, type: 'confirm' }, 5))
+    }
+  }
+}
+
+export const newBlog = blog => {
   return async dispatch => {
     const createdBlog = await blogService.createNew(blog)
     dispatch(appendBlog(createdBlog))
@@ -59,7 +71,7 @@ export const createBlog = blog => {
 
 export const initializeBlogs = () => {
   return async dispatch =>  {
-    const blogs = blogService.getAll()
+    const blogs = await blogService.getAll()
     dispatch(setBlogs(blogs))
   }
 }

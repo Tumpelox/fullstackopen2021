@@ -7,8 +7,11 @@ const messageSlice = createSlice({
     setMessage(state, action) {
       const message = action.payload
       state = message
+      return state
     },
     closeMessage(state, action) { // eslint-disable-line
+      state = { text:'', type:'' }
+      return state
     }
   }
 })

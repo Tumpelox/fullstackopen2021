@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { removeBlog, voteBlog } from '../reducers/blogsReducer'
 import { showMessage } from '../reducers/messageReducer'
+import { Link } from 'react-router-dom'
 
-const Blog = ({ blog }) => {
+const BlogCard = ({ blog }) => {
   const [expandBlog, setExpandBlog] = useState(false)
 
   const dispatch = useDispatch()
@@ -21,14 +22,6 @@ const Blog = ({ blog }) => {
     padding: '10px 5px',
     backgroundColor: '#e5e5e5',
     border: '1px solid gray'
-  }
-
-  const showName = () => {
-    if (blog.user.name) {
-      return <p>{blog.user.name}</p>
-    } else {
-      return
-    }
   }
 
   const deleteBlog = async blog => {
@@ -49,14 +42,14 @@ const Blog = ({ blog }) => {
   return (
     <li className='blog' style={{ listStyle: 'none'  }}>
       <div onClick={() => setExpandBlog( expandBlog ? false : true)} style={blogStyle}>
-        <p>{blog.title} -- {blog.author}<button className='deleteButton' onClick={() => deleteBlog(blog)}>Delete</button></p>
+        <p><Link to={'/blogs/' + blog.id}>{blog.title} -- {blog.author}</Link><button className='deleteButton' onClick={() => deleteBlog(blog)}>Delete</button></p>
       </div>
       <div style={{ ...showWhenVisible, ...expandStyle }} >
         <p>URL: <a href={blog.url}>{blog.url}</a></p>
         <p>Likes: {blog.likes} <button className='likeButton' onClick={() => updateBlog(blog)}>Like</button></p>
-        {showName()}
+        <p>{blog.user.name ? blog.user.name : blog.user.username}</p>
       </div>
     </li>
   )}
 
-export default Blog
+export default BlogCard

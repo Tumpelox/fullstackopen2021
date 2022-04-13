@@ -1,93 +1,67 @@
-import React, { useState, useEffect, useRef } from 'react'
-import Blog from './utilities/Blog'
-import blogService from './services/blogs'
-import Login from './utilities/Login'
-import Create from './utilities/CreateNewBlog'
-import Togglable from './utilities/Togglable'
+import React, { useEffect } from 'react'
+import Blogs from './components/Blogs'
+import Blog from './components/Blog'
+import Form from './components/Form'
+import Users from './components/Users'
+import User from './components/User'
 import Notification from './components/Notification'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { initializeBlogs } from './reducers/blogsReducer'
+import { initializeUser, initializeUsers } from './reducers/userReducer'
+import { BrowserRouter as Router,
+  Routes, Route, Link } from 'react-router-dom'
+
+const Menu = () => {
+  const padding = {
+    paddingRight: 5
+  }
+  return (
+    <div>
+      <Link to='/' style={padding}>blogs</Link>
+      <Link to='/users' style={padding}>users</Link>
+    </div>
+  )
+}
 
 const App = () => {
   const dispatch = useDispatch()
 
-  const blogForm = useRef()
-
   useEffect( () => dispatch(initializeBlogs()), [dispatch])
-
-  useEffect(() => {
-    const loggedUser = window.localStorage.getItem('loggedUser')
-    if (loggedUser) {
-      const user = JSON.parse(loggedUser)
-      blogService.setToken(user.token)
-      return setUser(user)
-    }
-  }, [])
-
-  const logout = () => {
-    setMessage({ text: `Logged out ${user.name !== undefined ? user.name : ''}`, type: 'confirm' }, 5)
-    setUser(null)
-    window.localStorage.removeItem('loggedUser')
-  }
-
-  const deleteBlog = async blog => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      try {
-
-        setMessage({ text: `Deleted ${blog.title} by ${blog.author} `, type: 'confirm' }, 5)
-      } catch(exception) {
-        setMessage({ text: 'Blog delete failed', type: 'error' }, 5)
-      }
-    }
-  }
-
-  const updateBlog = async blog => {
-    try {
-      voteBlog(blogs.filter(b => b.id !== blog.id ? b : b.likes += 1 ))
-      setMessage({ text: `Updated ${blog.title} by ${blog.author} `, type: 'confirm' }, 5)
-    } catch(exception) {
-      setMessage({ text: 'Blog update failed', type: 'error' }, 5)
-    }
-  }
-
-  const createBlog = async blog => {
-    try {
-      blogForm.current.toggleVisibility()
-      createBlog(blog)
-      setMessage({ text: `Added ${blog.title} by ${blog.author}`, type: 'confirm' }, 5)
-    } catch (exception) {
-      setMessage({ text: 'Failed to add new blog', type: 'error' }, 5)
-    }
-  }
-
-  const showBlogs = () => {
-    var user = useSelector(state => state.user)
-    return (
-      <>
-        <p>{user.name} logged in <button onClick={() => logout()}>Logout</button></p>
-        <Togglable buttonLabel='Create new' ref={blogForm}>
-          <Create />
-        </Togglable>
-      </>
-    )
-  }
-
-  const loginForm = () => (
-    <Togglable buttonLabel='Login' ref={blogForm}>
-      <Login />
-    </Togglable>
-  )
+  useEffect( () => dispatch(initializeUsers()), [dispatch])
+  useEffect( () => dispatch(initializeUser()), [dispatch])
 
   return (
-    <div>
+    <Router>
       <Notification />
+      <Menu />
       <h2>blogs</h2>
-      {user === null ?
-        loginForm() :
-        showBlogs()
-      }
-      <Blogs />
-    </div>
+      <Routes>
+        <Route path='/' element={
+          <>
+            <Form />
+            <Blogs />
+          </>
+        }/>
+        <Route path='/users' element={
+          <>
+            <Form />
+            <Users />
+          </>
+        }/>
+        <Route path='/users/:id' element={
+          <>
+            <Form />
+            <User />
+          </>
+        }/>
+        <Route path='/blogs/:id' element={
+          <>
+            <Form />
+            <Blog />
+          </>
+        }/>
+      </Routes>
+    </Router>
   )
 }
 
