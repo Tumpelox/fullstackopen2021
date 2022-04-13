@@ -37,21 +37,34 @@ blogsRouter.post('/', async (request, response) => {
     response.json(result)
 })
 
-blogsRouter.put('/:id', async (request, response) => {
+blogsRouter.post('/:id/comments', async (request, response) => {
     const blog = await Blog.findById(request.params.id)
 
     const body = request.body
 
-    const updatetBlog = new Blog({
-        id: blog._id.toString(),
-        title: body.title,
-        author: body.author,
-        url: body.url,
-        likes: body.likes,
-        user: blog.user._id.toString()
-    })
+    if (!request.token || !request.userId) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+    }
+    const user = await User.findById(request.userId)
 
-    var result = await Blog.findByIdAndUpdate({_id: blog._id.toString()}, request.body, { new: true }).populate({
+    if (!user.username) {
+        return response.status(401).json({ error: 'no authorization' })
+    } else {
+
+    const comments = { comments: blog.comments.length > 0 ? blog.comments.concat(body.comment) : [body.comment.toString()] }
+
+    var result = await Blog.findByIdAndUpdate({_id: blog._id.toString()}, comments, { new: true }).populate({
+        path: 'user',
+        select: 'username name _id'
+    })
+    response.json(result)
+    }
+})
+
+blogsRouter.put('/:id/likes', async (request, response) => {
+    const blog = await Blog.findById(request.params.id)
+
+    var result = await Blog.findByIdAndUpdate({_id: blog._id.toString()}, { likes: blog.likes + 1 }, { new: true }).populate({
         path: 'user',
         select: 'username name _id'
     })
