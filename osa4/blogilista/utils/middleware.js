@@ -27,6 +27,7 @@ const tokenExtractor = (request, response, next) => {
 }
 
 const userExtractor = (request, response, next) => {
+    try {
     const userId = (request) => {
         if (request.token) {
             return jwt.verify(request.token, config.SECRET).id
@@ -35,6 +36,9 @@ const userExtractor = (request, response, next) => {
     }
     request.userId = userId(request)
     next()
+    } catch (exception) {
+        next()
+    }
 }
 
 module.exports = { unknownEndpoint, errorHandler, tokenExtractor, userExtractor }
