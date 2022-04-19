@@ -102,13 +102,16 @@ type Author {
   name: String!
   id: ID!
   born: Int
-  bookCount: [Book!]!
+  bookCount: Int!
 }
 
 type Query {
   bookCount: Int!
   authorCount: Int!
-  allBooks(author: String, genre: String): [Book!]!
+  allBooks(
+    author: String
+    genre: String
+  ): [Book!]
   allAuthors: [Author!]!
 }
 
@@ -119,6 +122,10 @@ type Mutation {
     published: Int!
     genres: [String!]!
   ): Book
+  editAuthor(
+    name: String!
+    setBornTo: Int
+  ): Author
 }
 
 `
@@ -143,13 +150,14 @@ const resolvers = {
     name: (root) => root.name,
     born: (root) => root.born,
     id: (root) => root.id,
-    bookCount: (root) => books.filter(b => b.author === root.name),
+    bookCount: (root) => books.filter(b => b.author === root.name).length,
   },
   Mutation: {
     addBook: (root, args) => {
       var book = {}
-      if (authors.includes(a => a.name === args.author)) {
-        book = { ...args, id: authors.find(a => a.name === args.name).id }
+
+      if (authors.map(a => a.name).includes(args.author)) {
+        book = { ...args, id: authors.find(a => a.name === args.author).id }
         books = books.concat(book)
       } else {
         book = { ...args, id: uuid() }
@@ -157,6 +165,14 @@ const resolvers = {
         authors = authors.concat({ name: args.author, id: book.id})
       }
       return book
+    },
+    editAuthor: (root, args) => {
+      var author = {}
+      if (args.setBornTo && authors.map(a => a.name).includes(args.name)) {
+        author = {name: args.name, born: args.setBornTo, id: authors.find(a => a.name === args.name).id}
+        authors = authors.map(a => a.name === args.name ? author : a)
+      }
+      return author
     }
   }
 }
