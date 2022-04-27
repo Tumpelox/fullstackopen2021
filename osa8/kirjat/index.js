@@ -154,6 +154,7 @@ const resolvers = {
   },
   Mutation: {
     addBook: (root, args) => {
+      console.log(args)
       var book = {}
 
       if (authors.map(a => a.name).includes(args.author)) {
