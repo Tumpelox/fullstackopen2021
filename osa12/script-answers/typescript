@@ -1,0 +1,10 @@
+Script started on 2022-07-25 14:52:59+03:00 [TERM="xterm-256color" TTY="/dev/pts/3" COLUMNS="120" LINES="30"]
+]0;tuomas_tornberg@Tuomas-pelikone: ~/fullstackopen2021/part12/script-answers[01;32mtuomas_tornberg@Tuomas-pelikone[00m:[01;34m~/fullstackopen2021/part12/script-answers[00m$ docker run hell[K[K[K[K[K[K[K[K[K container run hello-world[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Krun -it ubuntu bash
+[?2004h]0;root@f60de756a2d9: /root@f60de756a2d9:/# [K]0;root@f60de756a2d9: /root@f60de756a2d9:/# mkdir /usr/src/app
+[?2004l[?2004h]0;root@f60de756a2d9: /root@f60de756a2d9:/# mkf   touch .-  /usr/src/app/index.js
+[?2004l[?2004h]0;root@f60de756a2d9: /root@f60de756a2d9:/# [Kexit
+[?2004lexit
+]0;tuomas_tornberg@Tuomas-pelikone: ~/fullstackopen2021/part12/script-answers[01;32mtuomas_tornberg@Tuomas-pelikone[00m:[01;34m~/fullstackopen2021/part12/script-answers[00m$ exit
+exit
+
+Script done on 2022-07-25 14:55:41+03:00 [COMMAND_EXIT_CODE="0"]
