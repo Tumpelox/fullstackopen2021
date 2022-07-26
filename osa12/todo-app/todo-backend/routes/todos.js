@@ -39,17 +39,14 @@ singleRouter.delete('/', async (req, res) => {
 
 /* GET todo. */
 singleRouter.get('/', async (req, res) => {
-  const id = req.params.id
-  const todo = await Todo.findOne({_id: id})
-  res.send(todo);
+  res.send(req.todo);
 });
 
 /* PUT todo. */
 singleRouter.put('/', async (req, res) => {
-  const id = req.params.id
-  const todo = await Todo.findOneAndUpdate({_id: id}, {
-   text: req.body.text
-  })
+  const newTodo = { text: req.todo.text , done: true}
+  console.log(newTodo)
+  const todo = await Todo.findOneAndUpdate({_id: req.todo.id}, newTodo)
   res.send(todo);
 });
 
